@@ -14,10 +14,9 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "dev": "npx drizzle-kit push --config drizzle.config.json --force && next dev",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "postinstall": "npx drizzle-kit push --config drizzle.config.json --force 2>/dev/null || true",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "db:push": "npx drizzle-kit push --config drizzle.config.json",

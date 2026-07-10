@@ -91,6 +91,14 @@ CREATE TABLE IF NOT EXISTS sessions (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- Private application secrets for zero-config one-click deployments.
+-- A Cloudflare encrypted JWT_SECRET overrides this when configured.
+CREATE TABLE IF NOT EXISTS app_secrets (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
+    created_at INTEGER NOT NULL DEFAULT (unixepoch())
+);
+
 -- Indexes — free tier perf
 CREATE INDEX IF NOT EXISTS idx_pageviews_site_timestamp ON pageviews(site_id, timestamp);
 CREATE INDEX IF NOT EXISTS idx_pageviews_user_hash ON pageviews(user_hash);
@@ -101,4 +109,4 @@ CREATE INDEX IF NOT EXISTS idx_sites_user ON sites(user_id);
 CREATE INDEX IF NOT EXISTS idx_rate_limits_window ON rate_limits(window_start);
 CREATE INDEX IF NOT EXISTS idx_audit_user_time ON audit_log(user_id, created_at);
 CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
-CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token_hash);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token_hash);

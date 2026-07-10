@@ -15,7 +15,7 @@
 ## 🎯 What You Get
 
 ```
-Your Website (any stack) ──► Your Worker ──► Your D1 ──► Your R2 ──► Your Dashboard
+Your Website (any stack) ──► Your Worker ──► Your D1 SQLite ──► Your Dashboard
                                (no Google, no Facebook, no one else sees data)
 ```
 
@@ -96,7 +96,7 @@ curl -X POST http://localhost:3000/api/track \
 
 ## 🚀 Deploy to Cloudflare (One-Click Automated Setup)
 
-We provide an automated, FormForge-inspired **1-Click Setup Automation (`npm run setup`)** that provisions your D1 Database, KV Namespace, R2 Bucket, securely injects your `JWT_SECRET` via Cloudflare's secret store (`wrangler secret put`), applies migrations, builds assets, and deploys — all automatically without requiring any manual copy-pasting into `wrangler.toml`!
+We provide a FormForge-inspired **1-Click Setup (`npm run setup`)** that deploys the Worker, automatically provisions the free D1 SQLite database, applies/self-bootstraps the schema, securely stores an optional JWT secret, builds assets, and deploys—without R2, a credit card, or resource-ID copy/paste.
 
 ### Option A: One-Click Interactive CLI Setup (`npm run setup` — Recommended)
 
@@ -110,13 +110,11 @@ npm run setup
 **What `setup.js` does automatically for you:**
 1. Checks Cloudflare authentication (`wrangler login`).
 2. Prompts for your preferred Worker/App Name (`prism-analytics`).
-3. Auto-creates Cloudflare D1 Database (`prism-analytics-db`), parses its `database_id`, and updates `wrangler.toml`.
-4. Auto-creates Cloudflare KV Namespace (`KV`), parses its `id`, and updates `wrangler.toml`.
-5. Auto-creates Cloudflare R2 Bucket (`prism-analytics-storage`).
-6. Auto-generates a secure 48-byte `JWT_SECRET` and pushes it directly to Cloudflare via `wrangler secret put JWT_SECRET` (never stored in plain text).
-7. Applies database schema migrations (`migrations/0001_initial.sql`).
-8. Builds optimized frontend static assets (`vite build`) and deploys (`wrangler deploy`).
-9. Displays your live dashboard URL: `https://prism-analytics.<your-subdomain>.workers.dev`!
+3. Deploys with Wrangler 4 automatic D1 provisioning—no `database_id` is committed or copied.
+4. Applies D1 SQLite migrations; the Worker also self-bootstraps safely on first API request.
+5. Generates a secure 48-byte `JWT_SECRET` and stores it in Cloudflare encrypted secrets when available; secure D1-backed key fallback keeps one-click deploy functional.
+6. Builds optimized frontend assets (`vite build`) and deploys (`wrangler deploy`).
+7. Displays your live dashboard URL. No R2 or KV subscription is required.
 
 ---
 
@@ -132,13 +130,11 @@ If you prefer provisioning each resource manually command-by-command:
 
 ```bash
 npx wrangler login
-npx wrangler d1 create prism-analytics-db          # copy database_id → wrangler.toml
-npx wrangler kv namespace create "KV"              # copy id → wrangler.toml
-npx wrangler r2 bucket create prism-analytics-storage
-npx wrangler secret put JWT_SECRET                 # 32+ random: openssl rand -base64 48
-npx wrangler d1 migrations apply prism-analytics-db --remote
-npx vite build                                     # creates dist/
-npx wrangler deploy
+npx wrangler login
+npx vite build
+npx wrangler deploy                                # automatically provisions D1
+npx wrangler d1 migrations apply DB --remote       # optional; Worker self-bootstraps
+npx wrangler secret put JWT_SECRET                 # optional hardening override
 ```
 
 Full guide: [docs/09-DEPLOYMENT.md](./docs/09-DEPLOYMENT.md) + [docs/10-ENV-VARIABLES.md](./docs/10-ENV-VARIABLES.md)
@@ -256,7 +252,7 @@ prism-analytics/
 │   ├── lib/ (security.ts, auth-helpers.ts, bot-detection.ts, version.ts, utils.ts)
 │   ├── shared/types.ts
 │   └── proxy.ts                        # Security headers + CSP + bot filter
-├── wrangler.toml                       # D1, KV, R2, assets
+├── wrangler.toml                       # automatic D1 SQLite + assets; no R2
 ├── package.json                        # v1.0.0
 ├── vite.config.ts, tailwind.config.js
 ├── .env.example
