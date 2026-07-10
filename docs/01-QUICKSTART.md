@@ -32,7 +32,7 @@ npm install
 npm run setup
 ```
 
-**That's it!** `setup.js` automatically provisions your D1 Database, KV Namespace, R2 Bucket, securely stores `JWT_SECRET` via Cloudflare Worker secrets (`wrangler secret put`), updates `wrangler.toml` dynamically, builds your frontend (`vite build`), and deploys directly to your Cloudflare account (`https://prism-analytics.<your-subdomain>.workers.dev`)!
+**That's it.** `setup.js` deploys with Wrangler automatic D1 SQLite provisioning, applies/self-bootstraps the schema, optionally stores `JWT_SECRET` in Cloudflare encrypted secrets, builds the Vite dashboard, and deploys. No R2, KV, resource-ID copy/paste, paid subscription, or credit card is required.
 
 If you wish to test locally with Cloudflare Workers after setup:
 

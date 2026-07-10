@@ -30,7 +30,7 @@ Processor:
 ## 5. Security Measures
 
 - Encryption in transit (TLS)
-- Encryption at rest (D1, R2)
+- Encryption at rest in Cloudflare D1 SQLite; no external object-storage processor
 - Access control (JWT + session revocation)
 - Audit logging
 - No raw IP storage, daily salted hashing

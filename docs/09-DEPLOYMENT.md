@@ -62,35 +62,24 @@ If you need fine-grained manual control over each Cloudflare command:
 npx wrangler login
 ```
 
-#### 2. Create D1 Database
+#### 2. Build and deploy with automatic D1 provisioning
 ```bash
-npx wrangler d1 create prism-analytics-db
-# Copy database_id → paste into wrangler.toml [[d1_databases]] database_id
-```
-
-#### 3. Create KV Namespace
-```bash
-npx wrangler kv namespace create "KV"
-# Copy id → paste into wrangler.toml [[kv_namespaces]] id
-```
-
-#### 4. Create R2 Bucket
-```bash
-npx wrangler r2 bucket create prism-analytics-storage
-```
-
-#### 5. Set Secrets (NEVER in plain text in wrangler.toml!)
-```bash
-npx wrangler secret put JWT_SECRET
-# Paste a long random string: openssl rand -base64 48
-```
-
-#### 6. Run Migrations & Deploy
-```bash
-npx wrangler d1 migrations apply prism-analytics-db --remote
 npx vite build
 npx wrangler deploy
 ```
+
+#### 3. Apply migrations (optional safety step)
+```bash
+npx wrangler d1 migrations apply DB --remote
+```
+The Worker also runs an idempotent D1 schema bootstrap before APIs, so first signup cannot fail on an empty database.
+
+#### 4. Optional external secret override
+```bash
+npx wrangler secret put JWT_SECRET
+# Generate with: openssl rand -base64 48
+```
+Without this override, the Worker creates a random signing key in its private D1 `app_secrets` table.
 
 Done! Visit `https://prism-analytics.YOUR_SUBDOMAIN.workers.dev`
 
@@ -115,7 +104,7 @@ See [10-ENV-VARIABLES.md](./10-ENV-VARIABLES.md)
 `.github/workflows/deploy.yml`:
 
 - On push to `main`: runs `npm ci`, `tsc --noEmit`, `vite build`, `wrangler d1 migrations apply --remote`, `wrangler deploy`
-- Needs `CLOUDFLARE_API_TOKEN` (Workers Edit, D1 Edit, KV Edit, R2 Edit) and `CLOUDFLARE_ACCOUNT_ID` as repo secrets.
+- Needs least-privilege `CLOUDFLARE_API_TOKEN` (Workers Edit + D1 Edit only) and `CLOUDFLARE_ACCOUNT_ID` as GitHub secrets.
 - Protect `main` branch, require PR review.
 
 ## Troubleshooting Deploy

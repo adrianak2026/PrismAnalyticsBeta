@@ -27,7 +27,7 @@ Version source of truth: `src/lib/version.ts` + `package.json` must match.
 - UI: Dark theme default, responsive 320-2560, toast, modals, PWA manifest, favicons
 - API: 13 endpoints documented
 - Docs: 20+ MD files, visual guides, architecture diagrams, privacy policies (4), DPA, GDPR checklist, audit report
-- Infra: Wrangler + D1 + KV + R2, GitHub Actions CI/CD, one-click deploy button
+- Infra: Wrangler + auto-provisioned D1 SQLite, GitHub Actions CI/CD, one-click deploy button; no R2 subscription
 
 ### Security
 
