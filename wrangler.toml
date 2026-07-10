@@ -1,0 +1,51 @@
+name = "prism-analytics"
+main = "src/worker/index.ts"
+compatibility_date = "2026-03-01"
+compatibility_flags = ["nodejs_compat"]
+
+# ── Assets (Vite build output) ──
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+run_worker_first = true
+not_found_handling = "single-page-application"
+
+# ── D1 Database ──
+[[d1_databases]]
+binding = "DB"
+database_name = "prism-analytics-db"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+migrations_dir = "migrations"
+preview_database_id = "REPLACE_WITH_PREVIEW_D1_ID"
+
+# ── KV Namespace (daily salt, 48h TTL) ──
+[[kv_namespaces]]
+binding = "KV"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
+preview_id = "REPLACE_WITH_PREVIEW_KV_ID"
+
+# ── R2 Bucket (Commented out so Cloudflare Free Tier users do not get R2 Subscription / Credit Card prompts!) ──
+# [[r2_buckets]]
+# binding = "R2"
+# bucket_name = "prism-analytics-storage"
+
+# ── Vars (non-secret) ──
+[vars]
+APP_URL = "https://prism-analytics.example.workers.dev"
+VERSION = "1.0.0"
+ENVIRONMENT = "production"
+
+# ── Secrets (set via `wrangler secret put`) ──
+# JWT_SECRET = set via `npx wrangler secret put JWT_SECRET` (min 32 chars)
+# Example: openssl rand -base64 48
+
+# ── Observability (optional) ──
+[observability]
+enabled = true
+head_sampling_rate = 0.1
+
+# ── Limits ──
+[limits]
+cpu_ms = 50
+
+# ── Unsafe (none) ──

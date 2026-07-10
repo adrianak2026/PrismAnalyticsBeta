@@ -1,0 +1,69 @@
+{
+  "name": "prism-analytics",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Privacy-first, cookie-free, self-hostable analytics on Cloudflare Workers + D1 + R2",
+  "keywords": ["analytics", "privacy", "cloudflare", "d1", "workers", "gdpr", "cookie-free", "self-hosted"],
+  "author": "PrismAnalytics Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/prism-analytics"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "dev": "npx drizzle-kit push --config drizzle.config.json --force && next dev",
+    "build": "next build",
+    "start": "next start",
+    "postinstall": "npx drizzle-kit push --config drizzle.config.json --force 2>/dev/null || true",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "db:push": "npx drizzle-kit push --config drizzle.config.json",
+    "db:studio": "npx drizzle-kit studio",
+    "worker:dev": "npx wrangler dev",
+    "worker:deploy": "npx wrangler deploy",
+    "worker:types": "npx wrangler types",
+    "cf:build": "npx vite build",
+    "cf:d1:create": "npx wrangler d1 create prism-analytics-db",
+    "cf:kv:create": "npx wrangler kv namespace create KV",
+    "cf:r2:create": "npx wrangler r2 bucket create prism-analytics-storage",
+    "cf:migrate:local": "npx wrangler d1 migrations apply prism-analytics-db --local",
+    "cf:migrate:remote": "npx wrangler d1 migrations apply prism-analytics-db --remote",
+    "setup": "node setup.js",
+    "audit": "npm run typecheck && npm run lint"
+  },
+  "dependencies": {
+    "@cloudflare/workers-types": "^4.20260317.1",
+    "@vitejs/plugin-react": "^4.7.0",
+    "clsx": "^2.1.1",
+    "dotenv": "17.3.1",
+    "drizzle-orm": "0.45.2",
+    "hono": "^4.12.8",
+    "jose": "^6.2.2",
+    "lucide-react": "^0.577.0",
+    "next": "16.2.6",
+    "pg": "8.20.0",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
+    "recharts": "^3.8.0",
+    "tailwind-merge": "^3.5.0",
+    "vite": "^5.4.21",
+    "wrangler": "^4.72.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.1.17",
+    "@types/node": "22.19.15",
+    "@types/pg": "8.18.0",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "drizzle-kit": "0.31.10",
+    "eslint": "9.39.4",
+    "eslint-config-next": "16.2.6",
+    "postcss": "8.5.8",
+    "tailwindcss": "4.1.17",
+    "typescript": "5.9.3"
+  }
+}
