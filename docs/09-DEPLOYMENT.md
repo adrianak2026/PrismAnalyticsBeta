@@ -45,7 +45,7 @@ npm run setup
 - Pre-checking Cloudflare login (`npx wrangler login`).
 - Auto-creating your D1 Database (`prism-analytics-db`) and writing `database_id` cleanly into `wrangler.toml`.
 - Auto-creating your KV Namespace (`KV`) and writing `id` cleanly into `wrangler.toml`.
-- Auto-creating your R2 Storage Bucket (`prism-analytics-storage`).
+- Setting up the optional Backblaze B2 archiving parameters (which you can populate in `.env` or Wrangler secrets).
 - Auto-generating a ultra-secure 48-byte `JWT_SECRET` and storing it encrypted inside Cloudflare via `wrangler secret put JWT_SECRET`.
 - Applying D1 database schema migrations (`migrations/0001_initial.sql`).
 - Building optimized frontend assets (`vite build`) and deploying your Worker globally (`wrangler deploy`).

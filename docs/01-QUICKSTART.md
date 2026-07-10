@@ -32,7 +32,7 @@ npm install
 npm run setup
 ```
 
-**That's it.** `setup.js` deploys with Wrangler automatic D1 SQLite provisioning, applies/self-bootstraps the schema, optionally stores `JWT_SECRET` in Cloudflare encrypted secrets, builds the Vite dashboard, and deploys. No R2, KV, resource-ID copy/paste, paid subscription, or credit card is required.
+**That's it.** `setup.js` deploys with Wrangler automatic D1 SQLite provisioning, applies/self-bootstraps the schema, optionally stores `JWT_SECRET` in Cloudflare encrypted secrets, builds the Vite dashboard, and deploys. No Cloudflare R2, KV, resource-ID copy/paste, paid subscription, or credit card is required (Backblaze B2 can be configured for exports).
 
 If you wish to test locally with Cloudflare Workers after setup:
 

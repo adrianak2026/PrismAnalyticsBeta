@@ -11,7 +11,7 @@ Google Analytics alone adds ~110 kB, requires cookie banners (GDPR), and sends d
 A **privacy-first, cookie-free, self-hosted** platform that lives 100% in your Cloudflare account.
 
 ```
-Your visitors → Your Worker → Your D1 → Your R2 → Your Dashboard
+Your visitors → Your Worker → Your D1 → Your B2 → Your Dashboard
                                  (no third party ever sees data)
 ```
 
@@ -23,7 +23,7 @@ Your visitors → Your Worker → Your D1 → Your R2 → Your Dashboard
 | **No IP stored** | IP + UA + daily rotating salt → SHA-256 → only hash stored |
 | **No fingerprint** | No canvas, WebGL, fonts enumeration |
 | **No third party** | No Google, no Facebook, no external CDN for analytics |
-| **Your infra** | D1 (SQLite on edge), KV (salt), R2 (exports) — all yours |
+| **Your infra** | D1 (SQLite on edge), KV (salt), Backblaze B2 (exports) — all yours |
 | **Open & auditable** | MIT, ~4k LOC, read it in 30 min |
 
 ### What You Track
@@ -48,7 +48,7 @@ Your visitors → Your Worker → Your D1 → Your R2 → Your Dashboard
 | Frontend | Next.js 16 (preview) + Tailwind CSS v4 + shadcn/ui + Lucide + Recharts | Modern, dark-first, responsive |
 | Backend Worker | Hono.js on Cloudflare Workers | <50 ms cold start |
 | DB | D1 (SQLite) + PostgreSQL for Next preview | Free tier friendly |
-| Storage | R2 | Cheap archive |
+| Storage | Backblaze B2 | Cheap archive |
 | Salt | KV | 48h TTL per day |
 | Auth | JWT (jose) + PBKDF2 210k + session table | No external auth provider |
 | ORM | Drizzle | Type-safe |
@@ -105,10 +105,10 @@ sessions (id, user_id FK CASCADE, token_hash, ua_hash, expires_at, revoked_at)
 
 - D1: 5M rows read/day, 100k writes/day — enough for ~10k pageviews/day
 - KV: 100k reads/day — salts are tiny
-- R2: 10 GB storage free — exports only
+- Backblaze B2: 10 GB storage free — exports only
 - Workers: 100k requests/day — track + dashboard
 
-For >100k pageviews/day, enable D1 autoscaling or archive old rows to R2 via cron.
+For >100k pageviews/day, enable D1 autoscaling or archive old rows to Backblaze B2 via cron.
 
 ### Non-Goals
 

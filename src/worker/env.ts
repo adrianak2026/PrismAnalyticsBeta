@@ -9,6 +9,11 @@ export type WorkerBindings = {
   APP_URL?: string;
   VERSION?: string;
   ENVIRONMENT?: string;
+  B2_ENDPOINT?: string;
+  B2_BUCKET_NAME?: string;
+  B2_APPLICATION_KEY_ID?: string;
+  B2_APPLICATION_KEY?: string;
+  B2_REGION?: string;
 };
 
 export type AppEnv = {

@@ -155,7 +155,7 @@ Downloads file: `content-disposition: attachment`. Audited. Up to 50k rows.
 
 ### DELETE /api/account
 
-Auth required. CASCADE deletes `sites`, `pageviews`, `sessions`, `audit_log`. R2 archive deletion is best-effort (requires Worker env with R2 binding — not available in Next preview, but documented for Cloudflare deploy).
+Auth required. CASCADE deletes `sites`, `pageviews`, `sessions`, `audit_log`. Backblaze B2 archive deletion is best-effort (requires Worker env with B2 credentials configured).
 
 ---
 

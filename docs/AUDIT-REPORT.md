@@ -1,7 +1,7 @@
 # 🔍 Professional Audit Report — PrismAnalytics v1.0.0
 
 **Audited:** 2026-07-10
-**Auditor Role:** Senior Full-stack (Cloudflare Workers, D1, R2, Next.js security)
+**Auditor Role:** Senior Full-stack (Cloudflare Workers, D1, Backblaze B2, Next.js security)
 **Codebase:** ~4.5k LOC across 45 files
 
 ---

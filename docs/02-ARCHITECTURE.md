@@ -22,11 +22,11 @@
                          │      │    │
               ┌──────────┘      │    └──────────┐
               ▼                 ▼               ▼
-         ┌─────────┐       ┌────────┐      ┌──────┐
-         │   D1    │       │   KV   │      │  R2  │
-         │ SQLite  │       │ salt/48h│      │ CSV  │
-         │ Edge    │       └────────┘      │ JSON │
-         └────┬────┘                       └──────┘
+          ┌─────────┐       ┌────────┐      ┌──────┐
+          │   D1    │       │   KV   │      │  B2  │
+          │ SQLite  │       │ salt/48h│      │ S3   │
+          │ Edge    │       └────────┘      │ CSV  │
+          └────┬────┘                       └──────┘
               │ ▲
               │ │ analytics query
               ▼ │
@@ -115,7 +115,7 @@ UA: Mozilla/5.0...
                     │
                     ▼
          Stored as pageviews.user_hash
-         Raw IP & UA never touch DB, logs, or R2.
+         Raw IP & UA never touch DB, logs, or Backblaze B2.
 ```
 
 ## Deployment Architecture
@@ -130,11 +130,11 @@ GitHub push main
    │     ├─► wrangler d1 migrations apply --remote
    │     └─► wrangler deploy → uploads Worker + assets + bindings
    │
-   └─► Cloudflare
+   └─► Cloudflare & Backblaze
          ├─► Worker prism-analytics (Hono, handles /api/* + serves dist/)
          ├─► D1 prism-analytics-db (migrations/0001_initial.sql)
          ├─► KV namespace (salt cache, 48h TTL)
-         └─► R2 bucket (exports, optional archiving)
+         └─► Backblaze B2 bucket (exports, optional archiving)
 ```
 
 ---
