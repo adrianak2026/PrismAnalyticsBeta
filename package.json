@@ -36,7 +36,6 @@
     "cf:build": "npx vite build",
     "cf:d1:create": "npx wrangler d1 create prism-analytics-db",
     "cf:kv:create": "npx wrangler kv namespace create KV",
-    "cf:r2:create": "npx wrangler r2 bucket create prism-analytics-storage",
     "cf:migrate:local": "npx wrangler d1 migrations apply prism-analytics-db --local",
     "cf:migrate:remote": "npx wrangler d1 migrations apply prism-analytics-db --remote",
     "setup": "node setup.js",
