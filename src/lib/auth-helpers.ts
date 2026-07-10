@@ -3,6 +3,7 @@ import { users, sessions, auditLog, rateLimits } from "@/db/schema";
 import { eq, and, gt } from "drizzle-orm";
 import { verifyJWT, sha256, generateToken, getClientIP } from "./security";
 import { NextRequest, NextResponse } from "next/server";
+import { ensureDatabaseSchema } from "@/db/bootstrap";
 
 const JWT_SECRET = process.env.JWT_SECRET || "prism-dev-secret-change-in-production-min-32-chars";
 
@@ -13,6 +14,7 @@ export interface AuthedUser {
 }
 
 export async function getAuthUser(req: NextRequest): Promise<AuthedUser | null> {
+  await ensureDatabaseSchema();
   const authHeader = req.headers.get("authorization");
   if (!authHeader?.startsWith("Bearer ")) return null;
   const token = authHeader.slice(7);
@@ -76,6 +78,7 @@ export async function auditEvent(userId: string | null, action: string, req: Nex
  * Falls back to memory limiter on DB errors.
  */
 export async function rateLimit(key: string, max: number, windowMs: number): Promise<{ allowed: boolean; retryIn: number }> {
+  await ensureDatabaseSchema();
   try {
     const now = Date.now();
     const [existing] = await db.select().from(rateLimits).where(eq(rateLimits.key, key)).limit(1);

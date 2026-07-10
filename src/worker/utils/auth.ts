@@ -1,7 +1,8 @@
 import type { Context, MiddlewareHandler } from "hono";
 import { SignJWT, jwtVerify } from "jose";
 import type { AuthUser } from "@/shared/types";
-import type { AppEnv } from "../env";
+import type { AppEnv, WorkerBindings } from "../env";
+import { getOrCreateD1Secret } from "../db/bootstrap";
 
 const encoder = new TextEncoder();
 const ITERATIONS = 100_000;
@@ -44,25 +45,59 @@ export async function verifyPassword(password: string, stored: string): Promise<
   return mismatch === 0;
 }
 
-const FALLBACK_SECRET = "prism-dev-secret-change-in-production-min-32-chars";
+async function sha256(value: string): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", encoder.encode(value));
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
 
-export async function createToken(user: AuthUser, secret?: string): Promise<string> {
-  const key = secret || FALLBACK_SECRET;
+export async function resolveJwtSecret(env: WorkerBindings): Promise<string> {
+  if (env.JWT_SECRET && env.JWT_SECRET.length >= 32) return env.JWT_SECRET;
+  return getOrCreateD1Secret(env.DB, "jwt_signing_key_v1");
+}
+
+export async function createToken(user: AuthUser, secret: string): Promise<string> {
   return new SignJWT({ email: user.email, name: user.name })
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(user.id)
+    .setIssuer("prism-analytics")
     .setIssuedAt()
     .setExpirationTime("7d")
-    .sign(encoder.encode(key));
+    .sign(encoder.encode(secret));
+}
+
+export async function registerSession(env: WorkerBindings, userId: string, token: string, userAgent: string | null) {
+  await env.DB.prepare(`
+    INSERT INTO sessions (id, user_id, token_hash, user_agent_hash, expires_at)
+    VALUES (?, ?, ?, ?, ?)
+  `).bind(
+    crypto.randomUUID(),
+    userId,
+    await sha256(token),
+    userAgent ? await sha256(userAgent) : null,
+    Date.now() + 7 * 24 * 60 * 60 * 1000,
+  ).run();
+}
+
+export async function revokeSession(env: WorkerBindings, token: string) {
+  await env.DB.prepare("UPDATE sessions SET revoked_at = ? WHERE token_hash = ?")
+    .bind(Date.now(), await sha256(token))
+    .run();
 }
 
 export async function verifyAuth(c: Context<AppEnv>): Promise<AuthUser | null> {
   const header = c.req.header("Authorization");
   if (!header?.startsWith("Bearer ")) return null;
+  const token = header.slice(7);
   try {
-    const key = c.env.JWT_SECRET || FALLBACK_SECRET;
-    const { payload } = await jwtVerify(header.slice(7), encoder.encode(key), { algorithms: ["HS256"] });
+    const key = await resolveJwtSecret(c.env);
+    const { payload } = await jwtVerify(token, encoder.encode(key), { algorithms: ["HS256"], issuer: "prism-analytics" });
     if (!payload.sub || typeof payload.email !== "string") return null;
+    const session = await c.env.DB.prepare(`
+      SELECT id FROM sessions
+      WHERE token_hash = ? AND expires_at > ? AND revoked_at IS NULL
+      LIMIT 1
+    `).bind(await sha256(token), Date.now()).first();
+    if (!session) return null;
     return { id: payload.sub, email: payload.email, name: typeof payload.name === "string" ? payload.name : null };
   } catch {
     return null;

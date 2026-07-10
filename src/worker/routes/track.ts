@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { AppEnv } from "../env";
 import { database, getSiteByCode, insertPageview, sites } from "../db/queries";
 import { detectBrowser, detectDevice, detectOS, anonymizeUser, isBot } from "../utils/anonymize";
+import { d1RateLimit, sha256 } from "../utils/security";
 import { eq } from "drizzle-orm";
 
 const payloadSchema = z.object({
@@ -37,7 +38,10 @@ track.post("/track", async (c) => {
   const userAgent = c.req.header("User-Agent") || null;
   if (isBot(userAgent)) return c.json({ status: "ignored" }, 200);
 
-  const ip = c.req.header("CF-Connecting-IP") || null;
+  const ip = c.req.header("CF-Connecting-IP") || "unknown";
+  const limiter = await d1RateLimit(c.env.DB, `track:${await sha256(ip)}`, 300, 60_000);
+  if (!limiter.allowed) return c.json({ error: "rate_limited" }, 429);
+
   const timestamp = Date.now();
   const userHash = await anonymizeUser(ip, userAgent, c.env);
   const today = new Date(timestamp).toISOString().slice(0, 10);

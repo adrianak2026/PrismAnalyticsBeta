@@ -1,4 +1,5 @@
 import type { WorkerBindings } from "../env";
+import { getOrCreateD1Secret } from "../db/bootstrap";
 
 const encoder = new TextEncoder();
 
@@ -26,7 +27,7 @@ export async function anonymizeUser(
     // Safe fallback if KV is unbound during local testing
   }
   if (!salt) {
-    salt = toHex(await crypto.subtle.digest("SHA-256", encoder.encode(`${env.JWT_SECRET || "fallback"}|${today}`))).slice(0, 32);
+    salt = await getOrCreateD1Secret(env.DB, saltKey);
   }
 
   const raw = `${ip || "unknown"}|${userAgent || "unknown"}|${salt}`;

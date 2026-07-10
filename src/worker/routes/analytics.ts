@@ -26,10 +26,23 @@ analytics.get("/analytics/live", async (c) => {
   if (!siteId) return c.json({ error: "siteId required" }, 400);
   const site = await getOwnedSite(c.env.DB, siteId, c.get("user").id);
   if (!site) return c.json({ error: "Access denied" }, 403);
-  const result = await c.env.DB.prepare(
-    "SELECT COUNT(DISTINCT user_hash) AS value FROM pageviews WHERE site_id = ? AND timestamp >= ?",
-  ).bind(siteId, Date.now() - 5 * 60 * 1000).first<{ value: number }>();
-  return c.json({ liveVisitors: result?.value ?? 0, windowMinutes: 5 });
+  const from = Date.now() - 5 * 60 * 1000;
+  const result = await c.env.DB.prepare(`
+    SELECT COUNT(DISTINCT user_hash) AS visitors, COUNT(*) AS views
+    FROM pageviews WHERE site_id = ? AND timestamp >= ?
+  `).bind(siteId, from).first<{ visitors: number; views: number }>();
+  const active = await c.env.DB.prepare(`
+    SELECT pathname, COUNT(DISTINCT user_hash) AS count
+    FROM pageviews WHERE site_id = ? AND timestamp >= ?
+    GROUP BY pathname ORDER BY count DESC LIMIT 5
+  `).bind(siteId, from).all<{ pathname: string; count: number }>();
+  return c.json({
+    liveVisitors: result?.visitors ?? 0,
+    liveViews: result?.views ?? 0,
+    activePages: active.results,
+    windowMinutes: 5,
+    timestamp: Date.now(),
+  });
 });
 
 analytics.get("/analytics/export", async (c) => {

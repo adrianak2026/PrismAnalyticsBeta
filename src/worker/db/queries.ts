@@ -37,10 +37,10 @@ export async function analyticsSummary(binding: D1Database, siteId: string, from
     db.select({ label: pageviews.os, views: count() }).from(pageviews).where(filter).groupBy(pageviews.os).orderBy(desc(count())).limit(6),
     db.select({ date: sql<string>`date(${pageviews.timestamp} / 1000, 'unixepoch')`, views: count(), unique: countDistinct(pageviews.userHash) }).from(pageviews).where(filter).groupBy(sql`date(${pageviews.timestamp} / 1000, 'unixepoch')`).orderBy(sql`date(${pageviews.timestamp} / 1000, 'unixepoch')`),
     db.select({ sessionId: pageviews.sessionId, views: count() }).from(pageviews).where(filter).groupBy(pageviews.sessionId),
-    db.select({ hour: sql<string>`strftime('%H', to_timestamp(${pageviews.timestamp} / 1000))`, views: count() })
+    db.select({ hour: sql<string>`strftime('%H', ${pageviews.timestamp} / 1000, 'unixepoch')`, views: count() })
       .from(pageviews)
       .where(and(eq(pageviews.siteId, siteId), gte(pageviews.timestamp, Date.now() - 86_400_000)))
-      .groupBy(sql`strftime('%H', to_timestamp(${pageviews.timestamp} / 1000))`),
+      .groupBy(sql`strftime('%H', ${pageviews.timestamp} / 1000, 'unixepoch')`),
     db.select({
       id: pageviews.id,
       occurredAt: pageviews.timestamp,
@@ -78,7 +78,7 @@ export async function analyticsSummary(binding: D1Database, siteId: string, from
   const hourlyTraffic = Array.from({ length: 24 }, (_, i) => {
     const h = i.toString().padStart(2, "0");
     const views = hourlyMap.get(h) ?? 0;
-    return { hour: \`\${h}:00\`, views, percentage: maxHourlyViews ? Math.round((views / maxHourlyViews) * 100) : 0 };
+    return { hour: h + ":00", views, percentage: maxHourlyViews ? Math.round((views / maxHourlyViews) * 100) : 0 };
   });
 
   return {
@@ -95,7 +95,7 @@ export async function analyticsSummary(binding: D1Database, siteId: string, from
     countries: countryRows.map((row) => ({ label: row.label || "Unknown", views: row.views, percentage: percentage(row.views) })),
     devices: deviceRows.map((row) => ({ label: row.label || "Unknown", views: row.views, percentage: percentage(row.views) })),
     browsers: browserRows.map((row) => ({ label: row.label || "Unknown", views: row.views, percentage: percentage(row.views) })),
-    os: osRows.map((row) => ({ label: row.label || "Unknown", views: r.views, percentage: percentage(row.views) })),
+    os: osRows.map((row) => ({ label: row.label || "Unknown", views: row.views, percentage: percentage(row.views) })),
     hourlyTraffic,
     recentLogs,
     period: days,
