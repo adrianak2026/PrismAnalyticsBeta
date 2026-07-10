@@ -24,7 +24,7 @@ Your Website (any stack) ──► Your Worker ──► Your D1 SQLite ──�
 | **No cookies** | Session UUID in `sessionStorage` (tab-only) |
 | **No IP stored** | `SHA256(IP\|UA\|dailySalt)` only — raw IP discarded in memory |
 | **No fingerprint** | No canvas/WebGL/fonts enumeration |
-| **No third party** | D1 + KV + R2 all in your account |
+| **No third party** | D1 + KV + Backblaze B2 all in your account |
 | **Your data** | Export CSV/JSON, cascade delete anytime |
 
 ---
@@ -96,7 +96,7 @@ curl -X POST http://localhost:3000/api/track \
 
 ## 🚀 Deploy to Cloudflare (One-Click Automated Setup)
 
-We provide a FormForge-inspired **1-Click Setup (`npm run setup`)** that deploys the Worker, automatically provisions the free D1 SQLite database, applies/self-bootstraps the schema, securely stores an optional JWT secret, builds assets, and deploys—without R2, a credit card, or resource-ID copy/paste.
+We provide a FormForge-inspired **1-Click Setup (`npm run setup`)** that deploys the Worker, automatically provisions the free D1 SQLite database, applies/self-bootstraps the schema, securely stores an optional JWT secret, builds assets, and deploys—without Cloudflare R2, a credit card, or resource-ID copy/paste.
 
 ### Option A: One-Click Interactive CLI Setup (`npm run setup` — Recommended)
 
@@ -114,7 +114,7 @@ npm run setup
 4. Applies D1 SQLite migrations; the Worker also self-bootstraps safely on first API request.
 5. Generates a secure 48-byte `JWT_SECRET` and stores it in Cloudflare encrypted secrets when available; secure D1-backed key fallback keeps one-click deploy functional.
 6. Builds optimized frontend assets (`vite build`) and deploys (`wrangler deploy`).
-7. Displays your live dashboard URL. No R2 or KV subscription is required.
+7. Displays your live dashboard URL. No Cloudflare R2 or KV subscription is required (Backblaze B2 is supported for archiving exports).
 
 ---
 
@@ -247,12 +247,12 @@ prism-analytics/
 │   │   ├── lib/api-client.ts
 │   │   └── globals.css (dark theme)
 │   ├── worker/                         # Cloudflare Worker (Hono) reference for deploy
-│   │   ├── index.ts, routes/*, db/*, storage/r2.ts, utils/*, env.ts
+│   │   ├── index.ts, routes/*, db/*, storage/r2.ts (Backblaze B2 client), utils/*, env.ts
 │   ├── db/schema.ts                    # PG for Next preview
 │   ├── lib/ (security.ts, auth-helpers.ts, bot-detection.ts, version.ts, utils.ts)
 │   ├── shared/types.ts
 │   └── proxy.ts                        # Security headers + CSP + bot filter
-├── wrangler.toml                       # automatic D1 SQLite + assets; no R2
+├── wrangler.toml                       # automatic D1 SQLite + assets; no Cloudflare R2
 ├── package.json                        # v1.0.0
 ├── vite.config.ts, tailwind.config.js
 ├── .env.example

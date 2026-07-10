@@ -3,7 +3,16 @@
   "version": "1.0.0",
   "private": true,
   "description": "Privacy-first, cookie-free, self-hostable analytics on Cloudflare Workers + D1 + R2",
-  "keywords": ["analytics", "privacy", "cloudflare", "d1", "workers", "gdpr", "cookie-free", "self-hosted"],
+  "keywords": [
+    "analytics",
+    "privacy",
+    "cloudflare",
+    "d1",
+    "workers",
+    "gdpr",
+    "cookie-free",
+    "self-hosted"
+  ],
   "author": "PrismAnalytics Team",
   "license": "MIT",
   "repository": {
@@ -36,6 +45,7 @@
   "dependencies": {
     "@cloudflare/workers-types": "^4.20260317.1",
     "@vitejs/plugin-react": "^4.7.0",
+    "aws4fetch": "^1.0.20",
     "clsx": "^2.1.1",
     "dotenv": "17.3.1",
     "drizzle-orm": "0.45.2",
